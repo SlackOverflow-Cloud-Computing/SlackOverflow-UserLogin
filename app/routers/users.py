@@ -7,7 +7,7 @@ from app.services.service_factory import ServiceFactory
 router = APIRouter()
 
 
-@router.get("/user/{user_id}", tags=["users"])
+@router.get("/user_info/{user_id}", tags=["users"])
 async def get_users(user_id: str) -> UserLogin:
 
     # TODO Do lifecycle management for singleton resource

@@ -17,8 +17,8 @@ class ServiceFactory(BaseServiceFactory):
         if service_name == 'UserLoginResource':  # 'CourseResource'
             result = user_resource.UserLoginResource(config=None)        # course_resource.CourseResource(config=None)
         elif service_name == 'UserLoginResourceDataService':  # 'CourseResourceDataService'
-            context = dict(user="root", password="dbuserdbuser",
-                           host="localhost", port=3306)
+            context = dict(user="admin", password="slackOverflowDB",
+                           host="database-1.ccjxezwbfect.us-east-1.rds.amazonaws.com", port=3306)
             data_service = MySQLRDBDataService(context=context)
             result = data_service
         else:

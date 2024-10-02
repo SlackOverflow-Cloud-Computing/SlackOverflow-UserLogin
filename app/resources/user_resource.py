@@ -14,8 +14,8 @@ class UserLoginResource(BaseResource):  # CourseResource
         # TODO -- Replace with dependency injection.
         #
         self.data_service = ServiceFactory.get_service("UserLoginResourceDataService")  # "CourseResourceDataService"
-        self.database = "p1_database"
-        self.collection = "user_login_tb"  # "course_sections"
+        self.database = "user_db"
+        self.collection = "user_info"  # "course_sections"
         self.key_field = "user_id"  # "sis_course_id"
 
     def get_by_key(self, key: str) -> UserLogin:

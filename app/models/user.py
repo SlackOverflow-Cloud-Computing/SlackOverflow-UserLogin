@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from pydantic import BaseModel
-
+from datetime import datetime
 
 """class CourseSection(BaseModel):
     course_id: Optional[int] = None
@@ -35,10 +35,10 @@ from pydantic import BaseModel
 
 
 class UserLogin(BaseModel):
-    user_id: Optional[int] = None
+    user_id: Optional[str] = None
     user_name: Optional[str] = None
     email: Optional[str] = None
-    created_at: Optional[str] = None  # Date format as string
+    created_at: Optional[datetime] = None  # Date format as string
     password: Optional[str] = None
     # phone_number: Optional[str] = None
     # last_login: Optional[str] = None  # Date format as string
@@ -50,7 +50,7 @@ class UserLogin(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "user_id": 123456,
+                "user_id": "f157e3c3-657a-4132-8820-3a4a637cb281",
                 "user_name": "johndoe",
                 "email": "johndoe@example.com",
                 "password": "123456789Abc.",
