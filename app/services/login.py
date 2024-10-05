@@ -1,7 +1,7 @@
 import requests
 from pydantic import ValidationError
 
-from models.user import User
+from app.models.user import User
 
 
 class LoginService:

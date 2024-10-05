@@ -1,7 +1,7 @@
 from framework.services.service_factory import BaseServiceFactory
 import app.resources.user_resource as user_resource  # course_resource
 from framework.services.data_access.MySQLRDBDataService import MySQLRDBDataService
-from login import LoginService
+from app.services.login import LoginService
 
 
 # TODO -- Implement this class
