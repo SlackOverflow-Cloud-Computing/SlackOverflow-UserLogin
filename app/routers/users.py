@@ -30,7 +30,6 @@ async def login(request: LoginRequest):
     """
 
     auth_code = request.auth_code
-    print(f"Trying to login with {auth_code}")
     spotify = ServiceFactory.get_service("Login")
     database = ServiceFactory.get_service("UserResourceDataService")
 
@@ -38,6 +37,7 @@ async def login(request: LoginRequest):
         user = spotify.get_user_info(auth_code)
         print(f"Got info: {user}")
         if not user:
+            print(f"Error for request: {request}")
             raise HTTPException(status_code=400, detail="Spotify Login Failed")
 
         # if user and user not in database: # Eventually add ability to save to database
