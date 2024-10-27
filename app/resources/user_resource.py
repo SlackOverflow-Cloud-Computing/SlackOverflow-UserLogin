@@ -4,19 +4,22 @@ from framework.resources.base_resource import BaseResource
 
 from app.models.user import User
 from app.services.service_factory import ServiceFactory
+import dotenv, os
+
+dotenv.load_dotenv()
+db = os.getenv('DB_NAME')
+collection = os.getenv('DB_COLLECTION')
 
 
-class UserResource(BaseResource):  # CourseResource
+class UserResource(BaseResource):
 
     def __init__(self, config):
         super().__init__(config)
 
-        # TODO -- Replace with dependency injection.
-        #
         self.data_service = ServiceFactory.get_service("UserResourceDataService")
-        self.database = "user_db"
-        self.collection = "user_info"  # "course_sections"
-        self.key_field = "id"  # "sis_course_id"
+        self.database = db
+        self.collection = collection
+        self.key_field = "id"
 
     def get_by_key(self, key: str) -> User:
 

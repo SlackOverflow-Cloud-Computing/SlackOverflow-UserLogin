@@ -1,9 +1,15 @@
 from framework.services.service_factory import BaseServiceFactory
 import app.resources.user_resource as user_resource
 from framework.services.data_access.MySQLRDBDataService import MySQLRDBDataService
+import dotenv, os
+
+dotenv.load_dotenv()
+user = os.getenv('DB_USER')
+password = os.getenv('DB_PASS')
+host = os.getenv('DB_HOST')
+port = int(os.getenv('DB_PORT'))
 
 
-# TODO -- Implement this class
 class ServiceFactory(BaseServiceFactory):
 
     def __init__(self):
@@ -16,8 +22,7 @@ class ServiceFactory(BaseServiceFactory):
             case 'UserResource':
                 result = user_resource.UserResource(config=None)
             case 'UserResourceDataService':
-                context = dict(user="admin", password="slackOverflowDB",
-                            host="database-1.ccjxezwbfect.us-east-1.rds.amazonaws.com", port=3306)
+                context = dict(user=user, password=password, host=host, port=port)
                 data_service = MySQLRDBDataService(context=context)
                 result = data_service
 
