@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,6 +22,17 @@ app.add_middleware(
 
 
 app.include_router(users.router)
+
+logging.basicConfig(level=logging.INFO, format="\n%(asctime)s - %(message)s\n")
+
+
+@app.middleware("http")
+async def log_request_response(request: Request, call_next):
+    logging.info(f"Before Request: {request.method} {request.url.path}")
+    response = await call_next(request)
+    logging.info(f"After Request: {request.method} {request.url.path}")
+
+    return response
 
 
 @app.get("/")
