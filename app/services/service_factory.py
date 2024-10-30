@@ -25,7 +25,10 @@ class ServiceFactory(BaseServiceFactory):
                 context = dict(user=user, password=password, host=host, port=port)
                 data_service = MySQLRDBDataService(context=context)
                 result = data_service
-
+            case 'TokenResource':
+                context = dict(user=user, password=password, host=host, port=port)
+                data_service = MySQLRDBDataService(context=context)
+                result = data_service
             case _:
                 result = None
 
