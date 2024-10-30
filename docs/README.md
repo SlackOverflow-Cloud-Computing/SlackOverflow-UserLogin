@@ -13,4 +13,4 @@ You must create a new [Python virtual environment](https://docs.python.org/3/lib
 
 ## Running the Application
 
-`uvicorn app.main:app --reload`
+`uvicorn app.main:app --reload --port 8088`
