@@ -31,3 +31,26 @@ class UserResource(BaseResource):
 
         result = User(**result)
         return result
+
+    def create_user(self, user_data: dict) -> User:
+
+        d_service = self.data_service
+
+        result = d_service.create_data_object(
+            self.database, self.collection, key_field=self.key_field, user_data=user_data
+        )
+
+        result = User(**result)
+        return result
+
+    # TODO: update_user
+    def update_user(self, user_data: dict) -> User:
+
+        d_service = self.data_service
+
+        result = d_service.create_data_object(
+            self.database, self.collection, key_field=self.key_field, user_data=user_data
+        )
+
+        result = User(**result)
+        return result
