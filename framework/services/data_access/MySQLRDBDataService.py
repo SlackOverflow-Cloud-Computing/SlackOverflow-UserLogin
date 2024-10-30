@@ -66,4 +66,32 @@ class MySQLRDBDataService(DataDataService):
 
         return result
 
+    def update_data_object(self, database_name: str, collection_name: str, key_field: str, user_data: dict):
+        connection = None
+        result = None
+
+        try:
+            key_value = user_data.pop(key_field)
+
+            set_clause = ", ".join([f"{field} = %s" for field in user_data.keys()])
+            sql_statement = f"UPDATE {database_name}.{collection_name} SET {set_clause} WHERE {key_field} = %s"
+
+            connection = self._get_connection()
+            cursor = connection.cursor()
+            cursor.execute(sql_statement, list(user_data.values()) + [key_value])
+            connection.commit()
+
+            result = cursor.rowcount
+            print(f"Updated {result} row(s).")
+
+        except Exception as e:
+            print(f"Error updating data object: {e}")
+            if connection:
+                connection.rollback()
+        finally:
+            if connection:
+                connection.close()
+
+        return result
+
 

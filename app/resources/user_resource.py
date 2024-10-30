@@ -55,4 +55,18 @@ class UserResource(BaseResource):
         print(f"Added user: {result}")
         return result
 
+    def update_user(self, user: User):
+        d_service = self.data_service
+        try:
+            user_data = user.model_dump()
+            user_update_result = d_service.update_data_object(
+                self.database, self.collection, key_field=self.key_field, user_data=user_data
+            )
+            print(f"Updated user: {user_update_result}")
+            return user_update_result
+
+        except Exception as e:
+            print(f"Error updating user or token: {e}")
+            return None
+
 
