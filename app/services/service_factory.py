@@ -9,6 +9,8 @@ password = os.getenv('DB_PASS')
 host = os.getenv('DB_HOST')
 port = int(os.getenv('DB_PORT'))
 
+print(user)
+print(host)
 
 class ServiceFactory(BaseServiceFactory):
 
