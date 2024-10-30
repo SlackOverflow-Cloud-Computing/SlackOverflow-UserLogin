@@ -1,4 +1,5 @@
 import pymysql
+from datetime import datetime
 from .BaseDataService import DataDataService
 
 
@@ -53,6 +54,8 @@ class MySQLRDBDataService(DataDataService):
         result = None
 
         try:
+            data_object["created_at"] = datetime.now()
+            data_object["last_login"] = datetime.now()
             sql_statement = f"INSERT INTO {database_name}.{collection_name} " + \
                 f"({', '.join(data_object.keys())}) " + \
                 f"VALUES ({', '.join(['%s'] * len(data_object))})"
