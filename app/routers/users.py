@@ -1,12 +1,13 @@
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from app.models.user import User
 from app.models.token import Token
 from app.resources.user_resource import UserResource
 from app.services.service_factory import ServiceFactory
+from datetime import datetime
 
 router = APIRouter()
 
@@ -28,28 +29,42 @@ async def get_token(token: str) -> Token:
     result = res.get_by_key(token)
     return result
 
-@router.post("/update_user", tags=["users"])
+
+@router.post("/create_user", tags=["users"], status_code=status.HTTP_201_CREATED)
+def create_user(request: UpdateRequest):
+    user_db = ServiceFactory.get_service("UserResource")
+    try:
+        result = user_db.get_by_key(request.user.id)
+        if result:
+            print(f"User already exists: {result}")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists.")
+        else:
+            if request.user.created_at is None:
+                request.user.created_at = datetime.now()
+            print(f"User does not exist, adding user: {request.user}")
+            user_db.add_user(request.user)
+            return {"message": "User created successfully", "user": request.user.dict()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/update_user", tags=["users"], status_code=status.HTTP_202_ACCEPTED)
 async def update_user(request: UpdateRequest):
-    """Update User Information in the Database
-
-    Currently only called by the composite service with the user and token
-    it gets from the login service. This just has the information from
-    Spotify, so we need to respond with the rest of the information
-    """
     print(f"Updating user: {request}")
-    res = ServiceFactory.get_service("UserResource")
-    result = res.get_by_key(request.user.id)
-    if result:
-        print(f"User already exists: {result}")
-    else:
-        print(f"User does not exist, adding user: {request.user}")
-        res.add_user(request.user)
-    # user = request.user
-    # token = request.token
-    # res = ServiceFactory.get_service("UserResource")
-    # If the user is already in the database, update the user
-    # If the user is not in the database, add the user
-    # Return user with completed fields
+    user_db = ServiceFactory.get_service("UserResource")
 
-    # TODO: res.update(user, token)
-    return request.user
+    try:
+        existing_user = user_db.get_by_key(request.user.id)
+        if existing_user:
+            print(f"User already exists: {existing_user}")
+            request.user.last_login = datetime.now()
+            user_db.update_user(request.user)
+        else:
+            print(f"User does not exist, adding user: {request.user}")
+            return user_db.add_user(request.user)
+
+        updated_user = user_db.get_by_key(request.user.id)
+        return updated_user
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
