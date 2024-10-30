@@ -11,6 +11,7 @@ port = int(os.getenv('DB_PORT'))
 
 print(user)
 print(host)
+print(port)
 
 class ServiceFactory(BaseServiceFactory):
 
