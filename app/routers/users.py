@@ -17,13 +17,13 @@ class UpdateRequest(BaseModel):
     token: Token
 
 
-@router.get("/user_info/{user_id}", tags=["users"])
-async def get_users(user_id: str) -> User:
+@router.get("/users/{user_id}", tags=["users"])
+async def get_user(user_id: str) -> User:
     res = ServiceFactory.get_service("UserResource")
     result = res.get_by_key(user_id)
     return result
 
-@router.get("/user_info/{token}", tags=["users"])
+@router.get("/users/{token}", tags=["users"])
 async def get_token(token: str) -> Token:
     res = ServiceFactory.get_service("TokenResource")
     result = res.get_by_key(token)
@@ -39,6 +39,8 @@ def create_user(request: UpdateRequest):
             print(f"User already exists: {result}")
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists.")
         else:
+            if request.user.created_at is None:
+                request.user.created_at = datetime.now()
             print(f"User does not exist, adding user: {request.user}")
             user_db.add_user(request.user)
             return {"message": "User created successfully", "user": request.user.dict()}
@@ -55,12 +57,11 @@ async def update_user(request: UpdateRequest):
         existing_user = user_db.get_by_key(request.user.id)
         if existing_user:
             print(f"User already exists: {existing_user}")
-            request.user.created_at = existing_user.created_at
             request.user.last_login = datetime.now()
             user_db.update_user(request.user)
         else:
             print(f"User does not exist, adding user: {request.user}")
-            user_db.add_user(request.user)
+            return user_db.add_user(request.user)
 
         updated_user = user_db.get_by_key(request.user.id)
         return updated_user
