@@ -1,16 +1,37 @@
 from typing import Any
+from datetime import datetime, timedelta
+import dotenv, os
+
+import jwt
 
 from framework.resources.base_resource import BaseResource
-
 from app.models.user import User
 from app.models.token import Token
 from app.services.service_factory import ServiceFactory
-import dotenv, os
 
 dotenv.load_dotenv()
 db = os.getenv('DB_NAME')
 collection = os.getenv('DB_COLLECTION')
 
+# JWT Info
+JWT_SECRET = os.getenv('JWT_SECRET')
+ALGORITHM = "HS256"
+MINUTES_TO_EXPIRATION = 60
+
+
+def create_user_jwt(user: User) -> str:
+    """Create a JWT token with the given data.
+
+    Data should be a dictionary with the info to be stored in the token.
+    For us this will be the user's Spotify ID and scopes.
+    """
+
+    data = {
+        "sub": user.id,
+        "iat": datetime.utcnow()
+    }
+    encoded_jwt = jwt.encode(data, JWT_SECRET, algorithm=ALGORITHM)
+    return encoded_jwt
 
 class UserResource(BaseResource):
 
@@ -49,6 +70,10 @@ class UserResource(BaseResource):
     def add_user(self, user: User):
         d_service = self.data_service
 
+        # Generate JWT for new user
+        token = create_user_jwt(user)
+        user.jwt = token
+
         result = d_service.add_data_object(
             self.database, self.collection, user.model_dump()
         )
@@ -68,5 +93,3 @@ class UserResource(BaseResource):
         except Exception as e:
             print(f"Error updating user or token: {e}")
             return None
-
-
