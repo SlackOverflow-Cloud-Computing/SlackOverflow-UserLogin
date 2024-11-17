@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from datetime import datetime, timedelta
 import dotenv, os
 
@@ -6,7 +6,7 @@ import jwt
 
 from framework.resources.base_resource import BaseResource
 from app.models.user import User
-from app.models.token import Token
+from app.models.spotify_token import SpotifyToken
 from app.services.service_factory import ServiceFactory
 
 dotenv.load_dotenv()
@@ -45,6 +45,22 @@ class UserResource(BaseResource):
         self.key_field = "id"
         self.token_key_field = 'access_token'
 
+    def validate_token(self, token: str) -> bool:
+        """Validate a JWT token."""
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+            return True
+        except jwt.JWTError:
+            return False
+
+    def get_user_id(self, token: str) -> Optional[str]:
+        """Get the user ID from a JWT token."""
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+            return payload.get("sub")
+        except jwt.JWTError:
+            return None
+
     def get_by_key(self, key: str) -> User:
 
         d_service = self.data_service
@@ -56,7 +72,7 @@ class UserResource(BaseResource):
             result = User(**result)
         return result
 
-    def get_by_token(self, token: str) -> Token:
+    def get_by_token(self, token: str) -> SpotifyToken:
 
         d_service = self.data_service
 
@@ -64,7 +80,7 @@ class UserResource(BaseResource):
             self.database, self.collection, key_field=self.key_field, key_value=token
         )
 
-        result = Token(**result)
+        result = SpotifyToken(**result)
         return result
 
     def add_user(self, user: User):
