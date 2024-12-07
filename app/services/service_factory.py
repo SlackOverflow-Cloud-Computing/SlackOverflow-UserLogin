@@ -18,19 +18,6 @@ class ServiceFactory(BaseServiceFactory):
     @classmethod
     def get_service(cls, service_name):
 
-        # match service_name:
-        #     case 'UserResource':
-        #         result = user_resource.UserResource(config=None)
-        #     case 'UserResourceDataService':
-        #         context = dict(user=user, password=password, host=host, port=port)
-        #         data_service = MySQLRDBDataService(context=context)
-        #         result = data_service
-        #     case 'TokenResource':
-        #         context = dict(user=user, password=password, host=host, port=port)
-        #         data_service = MySQLRDBDataService(context=context)
-        #         result = data_service
-        #     case _:
-        #         result = None
 
         if service_name == 'UserResource':
             result = user_resource.UserResource(config=None)
