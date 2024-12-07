@@ -26,9 +26,24 @@ def create_user_jwt(user: User) -> str:
     For us this will be the user's Spotify ID and scopes.
     """
 
+    def default_scopes(id):
+        scopes = {
+            "/auth/login": ["POST"],
+
+            "/users/{user_id}/playlists": ["GET"],
+            "/users/{user_id}": ["GET", "PUT"],
+            "/users/{user_id}/spotify_token": ["GET"],
+
+            "/playlists/{playlist_id}": ["GET", "PUT", "DELETE"],
+
+            "/recommendations": ["GET"],
+        }
+        return scopes
+
     data = {
         "sub": user.id,
-        "iat": datetime.utcnow()
+        "iat": datetime.utcnow(),
+        "scopes": default_scopes(user.id)
     }
     encoded_jwt = jwt.encode(data, JWT_SECRET, algorithm=ALGORITHM)
     return encoded_jwt

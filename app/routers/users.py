@@ -1,4 +1,5 @@
 import logging
+from typing_extensions import Optional
 
 import jwt
 from fastapi import APIRouter, HTTPException, status, Depends
@@ -38,38 +39,9 @@ async def get_user(user_id: str, token: str = Depends(oauth2_scheme)) -> User:
 
     return result
 
-@router.get("/users/spotify_token", tags=["users"])
-async def get_spotify_token(token: str = Depends(oauth2_scheme)) -> SpotifyToken:
-    """Use a JWT token to get a user's Spotify token."""
-    res = ServiceFactory.get_service("TokenResource")
 
-    user_id = res.get_user_id(token)
-
-    # TODO: I'm not sure how this works, what are we expecting as input here?
-    result = res.get_by_key(token)
-    return result
-
-
-@router.post("/create_user", tags=["users"], status_code=status.HTTP_201_CREATED)
-def create_user(request: UpdateRequest):
-    user_db = ServiceFactory.get_service("UserResource")
-    try:
-        result = user_db.get_by_key(request.user.id)
-        if result:
-            print(f"User already exists: {result}")
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists.")
-        else:
-            if request.user.created_at is None:
-                request.user.created_at = datetime.now()
-            print(f"User does not exist, adding user: {request.user}")
-            user_db.add_user(request.user)
-            return {"message": "User created successfully", "user": request.user.dict()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.put("/update_user", tags=["users"], status_code=status.HTTP_202_ACCEPTED)
-async def update_user(request: UpdateRequest):
+@router.put("/users/{user_id}", tags=["users"], status_code=status.HTTP_202_ACCEPTED)
+async def update_user(user_id: str, request: UpdateRequest, token:str = Depends(oauth2_scheme)):
     print(f"Updating user: {request}")
     user_db = ServiceFactory.get_service("UserResource")
 
@@ -86,5 +58,36 @@ async def update_user(request: UpdateRequest):
         updated_user = user_db.get_by_key(request.user.id)
         return updated_user
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/users/{user_id}/spotify_token", tags=["users"])
+async def get_spotify_token(user_id: str, token: str = Depends(oauth2_scheme)) -> Optional[SpotifyToken]:
+    """Use a JWT token to get a user's Spotify token."""
+    res = ServiceFactory.get_service("TokenResource")
+
+    if user_id != res.get_user_id(token):
+        return None
+
+    # TODO: I'm not sure how this works, what are we expecting as input here?
+    result = res.get_by_key(token)
+    return result
+
+
+@router.post("/users", tags=["users"], status_code=status.HTTP_201_CREATED)
+def create_user(request: UpdateRequest):
+    user_db = ServiceFactory.get_service("UserResource")
+    try:
+        result = user_db.get_by_key(request.user.id)
+        if result:
+            print(f"User already exists: {result}")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists.")
+        else:
+            if request.user.created_at is None:
+                request.user.created_at = datetime.now()
+            print(f"User does not exist, adding user: {request.user}")
+            user_db.add_user(request.user)
+            return {"message": "User created successfully", "user": request.user.dict()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
