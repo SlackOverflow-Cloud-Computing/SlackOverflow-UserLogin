@@ -34,7 +34,7 @@ def create_user_jwt(user: User) -> str:
             "/users/{user_id}": ["GET", "PUT"],
             "/users/{user_id}/spotify_token": ["GET"],
 
-            "/playlists/{playlist_id}": ["GET", "PUT", "DELETE"],
+            "/playlists/{playlist_id}": ["GET", "POST", "DELETE"],
 
             "/recommendations": ["GET"],
         }
