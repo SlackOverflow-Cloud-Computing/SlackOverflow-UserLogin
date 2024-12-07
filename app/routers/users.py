@@ -25,7 +25,7 @@ class UpdateRequest(BaseModel):
 async def get_user(user_id: str, token: str = Depends(oauth2_scheme)) -> User:
     res = ServiceFactory.get_service("UserResource")
 
-    if not res.validate_token(token):
+    if not res.validate_token(token, scope=("/users/{user_id}", "GET")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     result = res.get_by_key(user_id)
@@ -46,7 +46,7 @@ async def update_user(user_id: str, request: UpdateRequest, token:str = Depends(
     print(f"Updating user: {request}")
     user_db = ServiceFactory.get_service("UserResource")
 
-    if not user_db.validate_token(token, user_id):
+    if not user_db.validate_token(token, user_id, scope=("/users/{user_id}", "PUT")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     try:
@@ -71,7 +71,7 @@ async def get_spotify_token(user_id: str, token: str = Depends(oauth2_scheme)) -
     """Use a JWT token to get a user's Spotify token."""
     res = ServiceFactory.get_service("TokenResource")
 
-    if not res.validate_token(token):
+    if not res.validate_token(token, scope=("/users/{user_id}/spotify_token", "GET")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     # TODO: I'm not sure how this works, what are we expecting as input here?

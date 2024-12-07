@@ -60,17 +60,22 @@ class UserResource(BaseResource):
         self.key_field = "id"
         self.token_key_field = 'access_token'
 
-    def validate_token(self, token: str, user_id: str = None) -> bool:
+    def validate_token(self, token: str, id: Optional[str]=None, scope: Optional[tuple[str, str]]=None) -> bool:
         """Validate a JWT token.
 
-        Optionally check that the token belongs to a specific user.
+        Optionally checks that the token belongs to a specific user and
+        that the token has the required scope for the endpoint.
+        Scope is of the form ("/endpoint", "METHOD").
         """
         try:
             payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-            if user_id and payload.get("sub") != user_id:
+            if id is not None and payload.get("sub") != id:
+                return False
+            if scope is not None and scope[1] not in payload.get("scopes").get(scope[0]):
                 return False
             return True
-        except jwt.JWTError:
+
+        except jwt.exceptions.InvalidTokenError:
             return False
 
     def get_user_id(self, token: str) -> Optional[str]:
@@ -78,7 +83,7 @@ class UserResource(BaseResource):
         try:
             payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
             return payload.get("sub")
-        except jwt.JWTError:
+        except jwt.exceptions.InvalidTokenError:
             return None
 
     def get_by_key(self, key: str) -> User:
