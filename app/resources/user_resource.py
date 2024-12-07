@@ -35,8 +35,10 @@ def create_user_jwt(user: User) -> str:
             "/users/{user_id}/spotify_token": ["GET"],
 
             "/playlists/{playlist_id}": ["GET", "POST", "DELETE"],
+            "/playlists/{playlist_id}/tracks/{track_id}": ["DELETE"],
 
             "/recommendations": ["GET"],
+            "/recommendations/playlist": ["GET"],
         }
         return scopes
 
