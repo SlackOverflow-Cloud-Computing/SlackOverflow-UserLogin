@@ -60,10 +60,15 @@ class UserResource(BaseResource):
         self.key_field = "id"
         self.token_key_field = 'access_token'
 
-    def validate_token(self, token: str) -> bool:
-        """Validate a JWT token."""
+    def validate_token(self, token: str, user_id: str = None) -> bool:
+        """Validate a JWT token.
+
+        Optionally check that the token belongs to a specific user.
+        """
         try:
             payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+            if user_id and payload.get("sub") != user_id:
+                return False
             return True
         except jwt.JWTError:
             return False
