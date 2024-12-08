@@ -39,6 +39,7 @@ def create_user_jwt(user: User) -> str:
 
             "/recommendations": ["GET"],
             "/recommendations/playlist": ["GET"],
+            "/chats": ["POST"]
         }
         return scopes
 
