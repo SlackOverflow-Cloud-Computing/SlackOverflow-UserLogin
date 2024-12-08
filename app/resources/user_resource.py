@@ -116,6 +116,7 @@ class UserResource(BaseResource):
         # Generate JWT for new user
         token = create_user_jwt(user)
         user.jwt = token
+        print(f"Generated JWT: {token}")
 
         result = d_service.add_data_object(
             self.database, self.collection, user.model_dump()
