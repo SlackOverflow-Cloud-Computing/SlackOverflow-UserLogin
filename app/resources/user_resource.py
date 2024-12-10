@@ -33,6 +33,7 @@ def create_user_jwt(user: User) -> str:
             "/users/{user_id}/playlists": ["GET"],
             "/users/{user_id}": ["GET", "PUT"],
             "/users/{user_id}/spotify_token": ["GET"],
+            "/users/{user_id}/refreshed_token": ["GET"],
 
             "/playlists/{playlist_id}": ["GET", "POST", "DELETE"],
             "/playlists/{playlist_id}/tracks/{track_id}": ["DELETE"],
@@ -100,12 +101,12 @@ class UserResource(BaseResource):
             result = User(**result)
         return result
 
-    def get_by_token(self, token: str) -> SpotifyToken:
+    def get_spotify_by_token(self, token: str) -> SpotifyToken:
 
         d_service = self.data_service
 
         result = d_service.get_data_object(
-            self.database, self.collection, key_field=self.key_field, key_value=token
+            self.database, self.token_collection, key_field=self.key_field, key_value=token
         )
 
         result = SpotifyToken(**result)
@@ -119,10 +120,22 @@ class UserResource(BaseResource):
         user.jwt = token
         print(f"Generated JWT: {token}")
 
-        result = d_service.add_data_object(
+        result = d_service.add_user_data_object(
             self.database, self.collection, user.model_dump()
         )
         print(f"Added user: {result}")
+        return result
+
+    def add_spotify_token(self, user: User, token: SpotifyToken):
+        d_service = self.data_service
+        
+        info = token.model_dump()
+        info[self.key_field] = user.id
+        
+        result = d_service.add_spotify_data_object(
+            self.database, self.token_collection, info
+        )
+        print(f"Added token: {result}")
         return result
 
     def update_user(self, user: User):
