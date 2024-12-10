@@ -90,7 +90,7 @@ def create_user(request: UpdateRequest):
             print(f"User already exists: {result}")
             # raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists.")
             # I commented this out because the composite expects the up to date user object
-            return result.dict()
+            return {"message": "User already exists", "user": result.dict()}
         else:
             if request.user.created_at is None:
                 request.user.created_at = datetime.now()
