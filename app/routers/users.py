@@ -63,6 +63,9 @@ async def update_user(user_id: str, request: UpdateRequest, token:str = Depends(
         return updated_user
 
     except Exception as e:
+        # raise nested exception instead of generic 500
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -96,4 +99,7 @@ def create_user(request: UpdateRequest):
             user_db.add_user(request.user)
             return {"message": "User created successfully", "user": request.user.dict()}
     except Exception as e:
+        # raise nested exception instead of generic 500
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))
