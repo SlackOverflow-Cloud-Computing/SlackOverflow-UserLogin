@@ -72,13 +72,13 @@ async def update_user(user_id: str, request: UpdateRequest, token:str = Depends(
 @router.get("/users/{user_id}/spotify_token", tags=["users"])
 async def get_spotify_token(user_id: str, token: str = Depends(oauth2_scheme)) -> SpotifyToken:
     """Use a JWT token to get a user's Spotify token."""
-    res = ServiceFactory.get_service("TokenResource")
+    res = ServiceFactory.get_service("UserResource")
 
     if not res.validate_token(token, scope=("/users/{user_id}/spotify_token", "GET")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     # TODO: I'm not sure how this works, what are we expecting as input here?
-    result = res.get_by_key(token)
+    result = res.get_by_token(token)
     return result
 
 
