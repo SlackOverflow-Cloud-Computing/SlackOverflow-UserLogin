@@ -63,19 +63,21 @@ async def update_user(user_id: str, request: UpdateRequest, token:str = Depends(
         return updated_user
 
     except Exception as e:
+        # raise nested exception instead of generic 500
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/users/{user_id}/spotify_token", tags=["users"])
 async def get_spotify_token(user_id: str, token: str = Depends(oauth2_scheme)) -> SpotifyToken:
-    """Use a JWT token to get a user's Spotify token."""
-    res = ServiceFactory.get_service("TokenResource")
+    """Use a User ID to get a user's Spotify token."""
+    res = ServiceFactory.get_service("UserResource")
 
     if not res.validate_token(token, scope=("/users/{user_id}/spotify_token", "GET")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-    # TODO: I'm not sure how this works, what are we expecting as input here?
-    result = res.get_by_key(token)
+    result = res.get_spotify_by_token(user_id)
     return result
 
 
@@ -94,6 +96,10 @@ def create_user(request: UpdateRequest):
                 request.user.created_at = datetime.now()
             print(f"User does not exist, adding user: {request.user}")
             user_db.add_user(request.user)
+            user_db.add_spotify_token(request.user, request.token)
             return {"message": "User created successfully", "user": request.user.dict()}
     except Exception as e:
+        # raise nested exception instead of generic 500
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))

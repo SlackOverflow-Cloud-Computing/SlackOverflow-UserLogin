@@ -49,7 +49,7 @@ class MySQLRDBDataService(DataDataService):
 
         return result
 
-    def add_data_object(self, database_name: str, collection_name: str, data_object: dict):
+    def add_user_data_object(self, database_name: str, collection_name: str, data_object: dict):
         connection = None
         result = None
 
@@ -66,6 +66,26 @@ class MySQLRDBDataService(DataDataService):
         except Exception as e:
             if connection:
                 connection.close()
+            return e
+
+        return result
+
+    def add_spotify_data_object(self, database_name: str, collection_name: str, data_object: dict):
+        connection = None
+        result = None
+
+        try:
+            sql_statement = f"INSERT INTO {database_name}.{collection_name} " + \
+                f"({', '.join(data_object.keys())}) " + \
+                f"VALUES ({', '.join(['%s'] * len(data_object))})"
+            connection = self._get_connection()
+            cursor = connection.cursor()
+            cursor.execute(sql_statement, list(data_object.values()))
+            result = cursor.fetchone()
+        except Exception as e:
+            if connection:
+                connection.close()
+            return e
 
         return result
 
