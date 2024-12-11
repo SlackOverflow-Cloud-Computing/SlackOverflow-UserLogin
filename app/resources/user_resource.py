@@ -30,7 +30,7 @@ def create_user_jwt(user: User) -> str:
         scopes = {
             "/auth/login": ["POST"],
 
-            "/users/{user_id}/playlists": ["GET"],
+            "/users/{user_id}/playlists": ["GET", "POST"],
             "/users/{user_id}": ["GET", "PUT"],
             "/users/{user_id}/spotify_token": ["GET"],
             "/users/{user_id}/refreshed_token": ["GET"],
@@ -128,10 +128,10 @@ class UserResource(BaseResource):
 
     def add_spotify_token(self, user: User, token: SpotifyToken):
         d_service = self.data_service
-        
+
         info = token.model_dump()
         info[self.key_field] = user.id
-        
+
         result = d_service.add_spotify_data_object(
             self.database, self.token_collection, info
         )
