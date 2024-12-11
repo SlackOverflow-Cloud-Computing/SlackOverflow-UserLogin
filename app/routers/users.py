@@ -88,6 +88,18 @@ async def get_spotify_token(user_id: str, request: Request, token: str = Depends
     result = res.get_spotify_by_token(user_id, cid)
     return result
 
+@router.put("/users/{user_id}/spotify_token", tags=["users"])
+async def update_spotify_token(user_id: str, spotify_token: SpotifyToken, request: Request, token: str = Depends(oauth2_scheme)):
+    """Update user's Spotify token."""
+    cid = request.headers.get("X-Correlation-ID")
+    res = ServiceFactory.get_service("UserResource")
+
+    if not res.validate_token(token, scope=("/users/{user_id}/spotify_token", "PUT")):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    result = res.update_spotify_token(spotify_token, cid)
+    return result
+
 
 @router.post("/users", tags=["users"], status_code=status.HTTP_201_CREATED)
 def create_user(update_request: UpdateRequest, request: Request):

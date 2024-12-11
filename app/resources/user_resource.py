@@ -37,7 +37,7 @@ def create_user_jwt(user: User, cid: str) -> str:
 
             "/users/{user_id}/playlists": ["GET", "POST"],
             "/users/{user_id}": ["GET", "PUT"],
-            "/users/{user_id}/spotify_token": ["GET"],
+            "/users/{user_id}/spotify_token": ["GET", "PUT"],
             "/users/{user_id}/refreshed_token": ["GET"],
 
             "/playlists/{playlist_id}": ["GET", "POST", "DELETE"],
@@ -127,6 +127,21 @@ class UserResource(BaseResource):
 
         result = SpotifyToken(**result)
         return result
+    
+    def update_spotify_token(self, token: SpotifyToken, cid: str):
+        logger.info(f"Updating user's spotify token: {token} - [{cid}]")
+        d_service = self.data_service
+        try:
+            token = token.model_dump()
+            user_update_result = d_service.update_data_object(
+                self.database, self.token_collection, key_field=self.key_field, user_data=token
+            )
+            logger.info(f"Updated user's spotify token: {user_update_result}")
+            return user_update_result
+
+        except Exception as e:
+            logger.error(f"Error updating user or token: {e} - [{cid}]")
+            return None
 
     def add_user(self, user: User, cid: str):
         logger.info(f"Adding user: {user} - [{cid}]")
