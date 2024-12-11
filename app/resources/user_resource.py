@@ -38,9 +38,18 @@ def create_user_jwt(user: User) -> str:
             "/playlists/{playlist_id}": ["GET", "POST", "DELETE"],
             "/playlists/{playlist_id}/tracks/{track_id}": ["DELETE"],
 
+            "/songs": ["GET"],
+            "/songs/{song_id}": ["GET"],
+
             "/recommendations": ["GET"],
             "/recommendations/playlist": ["GET"],
-            "/chats": ["POST"]
+
+            "/chats": ["POST"],
+            "/chat_info/{chat_id}": ["GET"],
+            "/chat_details/{message_id}": ["GET"],
+            "/chat_history": ["GET"],
+            "/update_chat": ["POST"],
+            "general_chat": ["GET"]
         }
         return scopes
 
