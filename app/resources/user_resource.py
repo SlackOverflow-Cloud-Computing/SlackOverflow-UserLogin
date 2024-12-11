@@ -1,6 +1,7 @@
 from typing import Any, Optional
 from datetime import datetime, timedelta
 import dotenv,os
+import logging
 
 import jwt
 
@@ -13,18 +14,22 @@ dotenv.load_dotenv()
 db = os.getenv('DB_NAME')
 collection = os.getenv('DB_COLLECTION')
 
+logger = logging.getLogger("uvicorn")
+
 # JWT Info
 JWT_SECRET = os.getenv('JWT_SECRET')
 ALGORITHM = "HS256"
 MINUTES_TO_EXPIRATION = 60
 
 
-def create_user_jwt(user: User) -> str:
+def create_user_jwt(user: User, cid: str) -> str:
     """Create a JWT token with the given data.
 
     Data should be a dictionary with the info to be stored in the token.
     For us this will be the user's Spotify ID and scopes.
     """
+    
+    logger.info(f"Creating JWT - [{cid}]")
 
     def default_scopes(id):
         scopes = {
@@ -91,16 +96,18 @@ class UserResource(BaseResource):
         except jwt.exceptions.InvalidTokenError:
             return False
 
-    def get_user_id(self, token: str) -> Optional[str]:
+    def get_user_id(self, token: str, cid: str) -> Optional[str]:
         """Get the user ID from a JWT token."""
+        logger.info(f"Getting user ID from token {token} - [{cid}]")
         try:
             payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
             return payload.get("sub")
         except jwt.exceptions.InvalidTokenError:
+            logger.error(f"Invalid token: {token} - [{cid}]")
             return None
 
-    def get_by_key(self, key: str) -> User:
-
+    def get_by_key(self, key: str, cid: str) -> User:
+        logger.info(f"Getting user by key: {key} - [{cid}]")
         d_service = self.data_service
 
         result = d_service.get_data_object(
@@ -110,8 +117,8 @@ class UserResource(BaseResource):
             result = User(**result)
         return result
 
-    def get_spotify_by_token(self, token: str) -> SpotifyToken:
-
+    def get_spotify_by_token(self, token: str, cid: str) -> SpotifyToken:
+        logger.info(f"Getting spotify token by token: {token} - [{cid}]")
         d_service = self.data_service
 
         result = d_service.get_data_object(
@@ -121,21 +128,23 @@ class UserResource(BaseResource):
         result = SpotifyToken(**result)
         return result
 
-    def add_user(self, user: User):
+    def add_user(self, user: User, cid: str):
+        logger.info(f"Adding user: {user} - [{cid}]")
         d_service = self.data_service
 
         # Generate JWT for new user
-        token = create_user_jwt(user)
+        token = create_user_jwt(user, cid)
         user.jwt = token
-        print(f"Generated JWT: {token}")
+        logger.info(f"Generated JWT: {token} - [{cid}]")
 
         result = d_service.add_user_data_object(
             self.database, self.collection, user.model_dump()
         )
-        print(f"Added user: {result}")
+        logger.info(f"Added user: {result} - [{cid}]")
         return result
 
-    def add_spotify_token(self, user: User, token: SpotifyToken):
+    def add_spotify_token(self, user: User, token: SpotifyToken, cid: str):
+        logger.info(f"Adding spotify token: {token} - [{cid}]")
         d_service = self.data_service
 
         info = token.model_dump()
@@ -144,19 +153,20 @@ class UserResource(BaseResource):
         result = d_service.add_spotify_data_object(
             self.database, self.token_collection, info
         )
-        print(f"Added token: {result}")
+        logger.info(f"Added token: {result} - [{cid}]")
         return result
 
-    def update_user(self, user: User):
+    def update_user(self, user: User, cid: str):
+        logger.info(f"Updating user: {user} - [{cid}]")
         d_service = self.data_service
         try:
             user_data = user.model_dump()
             user_update_result = d_service.update_data_object(
                 self.database, self.collection, key_field=self.key_field, user_data=user_data
             )
-            print(f"Updated user: {user_update_result}")
+            logger.info(f"Updated user: {user_update_result}")
             return user_update_result
 
         except Exception as e:
-            print(f"Error updating user or token: {e}")
+            logger.error(f"Error updating user or token: {e} - [{cid}]")
             return None
