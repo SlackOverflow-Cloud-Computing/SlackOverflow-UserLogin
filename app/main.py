@@ -8,9 +8,11 @@ from app.routers import users
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:3000"
-]
+# origins = [
+#     "http://localhost:3000"
+# ]
+
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
